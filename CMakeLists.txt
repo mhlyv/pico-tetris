@@ -9,7 +9,13 @@ file(GLOB src_main
 )
 
 add_executable(tetris ${src_main})
-target_link_libraries(tetris pico_stdlib hardware_uart hardware_i2c)
+target_link_libraries(tetris
+	pico_stdlib
+	hardware_uart
+	hardware_i2c
+	hardware_spi
+)
+
 pico_add_extra_outputs(tetris)
 
 pico_enable_stdio_uart(tetris 1)
