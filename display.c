@@ -5,6 +5,7 @@
 
 #include "display.h"
 #include "tetris.h"
+#include "font8x8/font8x8_basic.h"
 
 enum DC {
 	DATA = 1,
@@ -265,4 +266,44 @@ void display_tetris(struct Tetris *tetris) {
 				WHITE_COLOR : BLACK_COLOR);
 		}
 	}
+}
+
+void display_draw_char(uint8_t x, uint8_t y, char c) {
+	if (c < 0) {
+		return;
+	}
+	display_set_address(
+		x * 8,
+		y * 8,
+		(x + 1) * 8 - 1,
+		(y + 1) * 8 - 1
+	);
+	for (uint8_t cx = 0; cx < 8; cx++) {
+		for (uint8_t cy = 0; cy < 8; cy++) {
+			uint8_t bit = font8x8_basic[c][cx] & 1 << cy;
+			display_wr_16(bit ? RED_COLOR : BLACK_COLOR);
+		}
+	}
+}
+
+// start displaying the string in the <row>. row, return the number of rows
+// the string takes up
+uint8_t display_draw_string(const char *str, uint8_t row) {
+	int x = 0;
+	int y = row;
+	for (uint8_t i = 0; str[i] != '\0'; i++) {
+		if (x * 8 >= DISPLAY_WIDTH) {
+			x = 0;
+			y++;
+		}
+		display_draw_char(x, y, str[i]);
+		x++;
+	}
+	
+	// increase y 
+	if (y == row) {
+		y++;
+	}
+
+	return y - row;
 }

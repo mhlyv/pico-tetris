@@ -10,13 +10,15 @@
 #include "tetris.h"
 #include "command_buffer.h"
 #include "tetris_uart.h"
-// #include "gyro.h"
+#include "gyro.h"
 #include "display.h"
+#include "toplist.h"
 
 #define UPDATE_RATE 500
 
 struct Tetris tetris;
 volatile bool UPDATE = false;
+volatile bool GAME_OVER = false;
 
 uint8_t tetris_random() {
 	return rand();
@@ -48,84 +50,93 @@ bool update_callback(struct repeating_timer *t) {
 void update() {
 	UPDATE = false;
 
-#ifdef TETRIS_UART_H
 	tetris_uart_print(&tetris);
 	uart_puts(UART_ID, "\r\n");
-#endif // TETRIS_UART_H
 
-#ifdef DISPLAY_H
-	// display_clear(0xF800);
 	display_tetris(&tetris);
-#endif // DISPLAY_H
 
-	tetris_update(&tetris);
+	GAME_OVER = tetris_update(&tetris);
 }
 
 int main() {
 	seed_random_from_rosc();
+
 	stdio_init_all();
-
-#ifdef TETRIS_UART_H
 	tetris_uart_init();
-#endif // TETRIS_UART_H
-
-#ifdef GYRO_H
 	gyro_init();
-#endif // GYRO_H
-
-#ifdef DISPLAY_H
 	display_init();
-#endif // DISPLAY_H
-
 	tetris_init(&tetris);
 
 	// start updating the game every 500 ms
 	struct repeating_timer update_timer;
 	if (!add_repeating_timer_ms(UPDATE_RATE, update_callback,
 				NULL, &update_timer)) {
-#ifdef TETRIS_UART_H
 		uart_puts(UART_ID, "Couldn't start repeating timer\r\n");
-#endif // TETRIS_UART_H
 	}
 
 	while (true) {
-#ifdef TETRIS_UART_H
 		tetris_uart_handle_rx();
-#endif // TETRIS_UART_H
 
-#ifdef GYRO_H
-		if (gyro_is_ready()) {
-			gyro_write_to_buffer();
-		}
-#endif // GYRO_H
+		if (GAME_OVER) {
+			toplist_add(tetris.score);
+			uint8_t display_y = 9;
 
-		if (UPDATE) {
-			update();
+			uart_puts(UART_ID, "Game Over!\r\n");
+			display_y += display_draw_string("Game Over!", display_y);
+
+			char buf[32];
+			sprintf(buf, "score: %u\r\n", tetris.score);
+			uart_puts(UART_ID, buf);
+			display_y += display_draw_string(buf, display_y);
+
+			uart_puts(UART_ID, "toplist:\r\n");
+			display_y += display_draw_string("toplist:", display_y);
+
+			for (uint8_t i = 0; i < TOPLIST_LENGTH; i++) {
+				sprintf(buf, "%u. %u\r\n", i + 1, toplist_read(i));
+				uart_puts(UART_ID, buf);
+				display_y += display_draw_string(buf, display_y);
+			}
+
+			sleep_ms(5000);
+
+			// reset
+			tetris_init(&tetris);
+			gyro_reset();
+			GAME_OVER = false;
+		} else {
+			if (gyro_is_ready()) {
+				gyro_write_to_buffer();
+			}
+
+			if (UPDATE) {
+				update();
+			}
+			switch (command_buffer_read()) {
+				case 0:
+					break;
+				case RESET_CMD:
+					tetris_init(&tetris);
+					gyro_reset();
+					break;
+				case LEFT_CMD:
+					tetris_move_tetromino_left(&tetris);
+					break;
+				case RIGHT_CMD:
+					tetris_move_tetromino_right(&tetris);
+					break;
+				case ROTATE_CW_CMD:
+					tetris_rotate_cw(&tetris);
+					break;
+				case ROTATE_CCW_CMD:
+					tetris_rotate_ccw(&tetris);
+					break;
+				case DROP_CMD:
+					tetris_drop(&tetris);
+					break;
+				default:
+					break;
+			}
 		}
-		switch (command_buffer_read()) {
-			case 0:
-				break;
-			case RESET_CMD:
-				tetris_init(&tetris);
-#ifdef GYRO_H
-				gyro_reset();
-#endif // GYRO_H
-				break;
-			case LEFT_CMD:
-				tetris_move_tetromino_left(&tetris);
-				break;
-			case RIGHT_CMD:
-				tetris_move_tetromino_right(&tetris);
-				break;
-			case ROTATE_CW_CMD:
-				tetris_rotate_cw(&tetris);
-				break;
-			case ROTATE_CCW_CMD:
-				tetris_rotate_ccw(&tetris);
-				break;
-			default:
-				break;
-		}
-		// sleep_ms(10);
 	}
 }

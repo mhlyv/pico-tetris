@@ -78,6 +78,7 @@ void tetris_init(struct Tetris *tetris) {
 
 	tetris_set_new_tetromino(tetris);
 	tetris->need_update = false;
+	tetris->score = 0;
 }
 
 
@@ -342,19 +343,58 @@ void tetris_remove_full_rows(struct Tetris *tetris) {
 			is_full = tetris_get_board_block(tetris, j, i);
 		}
 		if (is_full) {
+			// increase score for each removed row
+			tetris->score++;
 			tetris_remove_row(tetris, i);
 			i++;
 		}
 	}
 }
 
-void tetris_update(struct Tetris *tetris) {
+// returns non 0 if game is over
+uint8_t tetris_is_game_over(struct Tetris *tetris) {
+	// get the size from the first bit
+	int8_t size = 3 + (tetris->tetrominos[tetris->tetromino] >> 15);
+
+	for (int8_t i = tetris->y; i < 0; i++) {
+		for (uint8_t j = 0; j < size; j++) {
+			// check if there is a block outside the board
+			if (tetris_get_tetromino_block(tetris, tetris->tetromino, j, i + size)) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+// returns non 0 if the game is over
+uint8_t tetris_update(struct Tetris *tetris) {
 	if (tetris_check_collision(tetris) || tetris->need_update) {
 		tetris->need_update = 0;
 		tetris_save_tetromino_to_board(tetris);
 		tetris_remove_full_rows(tetris);
+
+		if (tetris_is_game_over(tetris)) {
+			return 1;
+		}
+
 		tetris_set_new_tetromino(tetris);
 	} else {
 		tetris->y++;
 	}
+
+	return 0;
+}
+
+void tetris_drop(struct Tetris *tetris) {
+    if (tetris->need_update) {
+        return;
+    } else {
+        tetris->need_update = 1;
+    }
+    
+    while (!tetris_check_collision(tetris)) {
+        tetris->y++;
+    }
 }

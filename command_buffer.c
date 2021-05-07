@@ -18,7 +18,7 @@ bool command_buffer_write(uint8_t command) {
 
 		bool valid = command == LEFT_CMD || command == RIGHT_CMD ||
 			command == ROTATE_CW_CMD || command == ROTATE_CCW_CMD ||
-			command == RESET_CMD;
+			command == RESET_CMD || command == DROP_CMD;
 
 		if (valid) {
 			*command_write = command;

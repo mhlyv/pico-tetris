@@ -25,6 +25,9 @@ struct Tetris {
 	int8_t x;
 	int8_t y;
 	uint8_t need_update;
+
+	// 1 line cleared = 1 point
+	uint16_t score;
 };
 
 // this is just a forward declaration, the user must implement this
@@ -47,6 +50,8 @@ uint8_t tetris_check_collision(struct Tetris *tetris);
 void tetris_save_tetromino_to_board(struct Tetris *tetris);
 void tetris_remove_row(struct Tetris *tetris, uint8_t r);
 void tetris_remove_full_rows(struct Tetris *tetris);
-void tetris_update(struct Tetris *tetris);
+uint8_t tetris_is_game_over(struct Tetris *tetris);
+uint8_t tetris_update(struct Tetris *tetris);
+void tetris_drop(struct Tetris *tetris);
 
 #endif // TETRIS_H

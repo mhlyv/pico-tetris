@@ -14,6 +14,8 @@ target_link_libraries(tetris
 	hardware_uart
 	hardware_i2c
 	hardware_spi
+	hardware_flash
+	hardware_sync
 )
 
 pico_add_extra_outputs(tetris)
