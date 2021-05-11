@@ -31,7 +31,8 @@ void tetris_uart_print(struct Tetris *tetris) {
 // read commands from the uart, and write them to the command buffer
 void tetris_uart_handle_rx() {
 	while (uart_is_readable(UART_ID)) {
-		while (!command_buffer_write(uart_getc(UART_ID))) {
+		char c = uart_getc(UART_ID);
+		while (!command_buffer_write(c)) {
 			tight_loop_contents();
 		}
 	}

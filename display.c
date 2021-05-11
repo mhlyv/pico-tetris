@@ -290,13 +290,13 @@ void display_draw_char(uint8_t x, uint8_t y, char c) {
 		return;
 	}
 	display_set_address(
-		x * 8,
-		y * 8,
-		(x + 1) * 8 - 1,
-		(y + 1) * 8 - 1
+		x * DISPLAY_FONT_SIZE,
+		y * DISPLAY_FONT_SIZE,
+		(x + 1) * DISPLAY_FONT_SIZE - 1,
+		(y + 1) * DISPLAY_FONT_SIZE - 1
 	);
-	for (uint8_t cx = 0; cx < 8; cx++) {
-		for (uint8_t cy = 0; cy < 8; cy++) {
+	for (uint8_t cx = 0; cx < DISPLAY_FONT_SIZE; cx++) {
+		for (uint8_t cy = 0; cy < DISPLAY_FONT_SIZE; cy++) {
 			uint8_t bit = font8x8_basic[(uint8_t)c][cx] & 1 << cy;
 			display_wr_16(bit ? RED_COLOR : BLACK_COLOR);
 		}

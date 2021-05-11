@@ -21,10 +21,10 @@
 static struct Tetris tetris;
 
 // flag if update() needs to be called
-volatile bool UPDATE = false;
+static volatile bool UPDATE = false;
 
 // flag if the game is over
-volatile bool GAME_OVER = false;
+static volatile bool GAME_OVER = false;
 
 // repeating timer structure for update_callback()
 static struct repeating_timer update_timer;

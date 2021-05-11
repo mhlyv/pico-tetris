@@ -7,15 +7,15 @@
 #include "toplist.h"
 
 // where the toplist starts
-#define FLASH_TARGET_OFFSET (256 * 1024)
+#define FLASH_TARGET_OFFSET (FLASH_PAGE_SIZE * 1024)
 
 // pointer to the content of the flash
-const uint8_t *flash_content = (const uint8_t *)(XIP_BASE + FLASH_TARGET_OFFSET);
+static const uint8_t *flash_content = (const uint8_t *)(XIP_BASE + FLASH_TARGET_OFFSET);
 
 // write the new scores to the flash
 static void toplist_write_scores(uint16_t *scores) {
 	uint8_t buffer[FLASH_PAGE_SIZE] = {0};
-	for (uint8_t i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < TOPLIST_LENGTH; i++) {
 		buffer[2 * i] = scores[i] >> 8;
 		buffer[2 * i + 1] = scores[i];
 	}
@@ -40,11 +40,11 @@ void toplist_clear() {
 
 // add a new score to the toplist if it qualifies
 void toplist_add(uint16_t score) {
-	uint16_t scores[3];
+	uint16_t scores[TOPLIST_LENGTH];
 	uint8_t higher_then = TOPLIST_LENGTH;
 
 	// read current
-	for (uint8_t i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < TOPLIST_LENGTH; i++) {
 		scores[i] = (flash_content[i * 2] << 8) | flash_content[i * 2 + 1];
 		if (score > scores[i] && higher_then == TOPLIST_LENGTH) {
 			higher_then = i;

@@ -14,15 +14,20 @@ static volatile uint8_t *command_write = command_buffer;
 // pointer for the next read
 static volatile uint8_t *command_read = command_buffer;
 
-// flag for locking the buffer (in case of using the buffer in interrupts)
-static volatile bool lock = false;
+// flags for locking the buffer (in case of using the buffer in interrupts)
+static volatile bool write_lock = false;
+static volatile bool read_lock = false;
 
 // write a command to the buffer
 // return true if the write was successful, false otherwise
 bool command_buffer_write(uint8_t command) {
+	// lock
+	write_lock = true;
+
 	bool success = false;
-	if (!lock) {
-		lock = true;
+	
+	// check if currently reading
+	if (!read_lock) {
 		success = true;
 
 		// check if the command is valid
@@ -39,19 +44,23 @@ bool command_buffer_write(uint8_t command) {
 				command_write = command_buffer;
 			}
 		}
-
-		lock = false;
 	}
+
+	// unlock
+	write_lock = false;
 	return success;
 }
 
 // read a command to the buffer
-// return true if the read was successful, false otherwise
+// return the command if the read was successful, 0 otherwise
 uint8_t command_buffer_read() {
-	uint8_t command = 0;
-	if (!lock) {
-		lock = true;
+	// lock
+	read_lock = true;
 
+	uint8_t command = 0;
+
+	// check if currently writing
+	if (!write_lock) {
 		command = *command_read;
 
 		// jump to the next if the current one is not 0
@@ -64,8 +73,9 @@ uint8_t command_buffer_read() {
 				command_read = command_buffer;
 			}
 		}
-
-		lock = false;
 	}
+
+	// unlock
+	read_lock = false;
 	return command;
 }
