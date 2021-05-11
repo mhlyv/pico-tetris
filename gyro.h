@@ -10,7 +10,7 @@
 #define GYRO_BAUD_RATE 400000
 #define GYRO_SAMPLE_RATE 20
 #define GYRO_TIMEOUT 140
-#define GYRO_TRESHOLD 1700
+#define GYRO_TRESHOLD 2000
 
 void gyro_init();
 void gyro_reset();

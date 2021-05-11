@@ -6,11 +6,20 @@
 #include "gyro.h"
 #include "tetris_uart.h"
 
+// calibration value, offset of the acceleration among the x axis
+// set by gyro_calibrate_x_acc(), used by gyro_read_x_acc
 static volatile uint16_t x_acc_offset = 0;
-static volatile uint8_t gyro_skip = 0; // if not 0, skip sample
-static volatile bool GYRO_READY = false;
-struct repeating_timer gyro_timer;
 
+// the number of times the gyroscope sampler has to skip
+static volatile uint8_t gyro_skip = 0;
+
+// flag marking if the gyro is ready to be sampled
+static volatile bool GYRO_READY = false;
+
+// repeating timer structure for the gyro_ready_callback()
+static struct repeating_timer gyro_timer;
+
+// inicialize the gyroscope
 void gyro_init() {
     i2c_init(i2c_default, GYRO_BAUD_RATE);
     gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
@@ -20,10 +29,11 @@ void gyro_init() {
 	gyro_reset();
 }
 
+// reset the gyroscope
 void gyro_reset() {
 	cancel_repeating_timer(&gyro_timer);
 
-	// Two byte reset. First byte register, second byte data
+	// Two byte reset. First byte register, second byte data.
     uint8_t buf[] = {0x6B, 0x00};
     i2c_write_blocking(i2c_default, GYRO_ADDR, buf, 2, false);
 	gyro_calibrate_x_acc();
@@ -39,6 +49,7 @@ bool gyro_is_ready() {
 	return GYRO_READY;
 }
 
+// read accelerometer data into the buffer
 void gyro_read_acc(int16_t accel[3]) {
     uint8_t buffer[6];
 
@@ -51,6 +62,7 @@ void gyro_read_acc(int16_t accel[3]) {
     }
 }
 
+// read acceleration among the x axis
 int16_t gyro_read_x_acc() {
 	uint8_t buffer[2];
     uint8_t val = 0x3B;
@@ -59,11 +71,14 @@ int16_t gyro_read_x_acc() {
 	return (buffer[0] << 8 | buffer[1]);
 }
 
+// calibrate the acceleration among the x axis
+// read some samples, then average them, so when reading the actual values
+// the offset can be added to it to make it 0
 void gyro_calibrate_x_acc() {
 	int32_t accumulator = 0;
 	int32_t samples = 100;
 
-	for (size_t i = 0; i < samples; i++) {
+	for (int32_t i = 0; i < samples; i++) {
 		accumulator += gyro_read_x_acc();
 		sleep_ms(5);
 	}
@@ -71,6 +86,8 @@ void gyro_calibrate_x_acc() {
 	x_acc_offset = - accumulator / samples;
 }
 
+// read acceleration data, and write a command to the global command buffer
+// if an event was triggered
 void gyro_write_to_buffer() {
 	GYRO_READY = false;
 	int16_t x_acc = gyro_read_x_acc() + x_acc_offset;
@@ -84,7 +101,9 @@ void gyro_write_to_buffer() {
 	}
 }
 
+// set the GYRO_READY flag to true, with respect to the timeout of the gyro
 bool gyro_ready_callback(struct repeating_timer *t) {
+	(void)t;
 	if (gyro_skip == 0) {
 		GYRO_READY = true;
 	} else {

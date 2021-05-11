@@ -3,6 +3,8 @@ include(pico_sdk_import.cmake)
 project(tetris CXX C ASM)
 pico_sdk_init()
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+
 file(GLOB src_main
 	*.c
 	*.h

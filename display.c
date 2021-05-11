@@ -14,64 +14,63 @@ enum DC {
 
 // commands for ST7735S
 // source: https://www.crystalfontz.com/controllers/Sitronix/ST7735S/320
-enum COMMAND {
-	NOP       = 0x00,
-	SWRESET   = 0x01, // Software Reset 
-	RDDID     = 0x04, // Read Display ID 
-	RDDST     = 0x09, // Read Display Status 
-	RDDPM     = 0x0A, // Read Display Power Mode 
-	RDDMADCTL = 0x0B, // Read Display MADCTL 
-	RDDCOLMOD = 0x0C, // Read Display Pixel Format 
-	RDDIM     = 0x0D, // Read Display Image Mode 
-	RDDSM     = 0x0E, // Read Display Signal Mode 
-	RDDSDR    = 0x0F, // Read Display Self-Diagnostic Result 
-	SLPIN     = 0x10, // Sleep In 
-	SLPOUT    = 0x11, // Sleep Out 
-	PTLON     = 0x12, // Partial Display Mode On 
-	NORON     = 0x13, // Normal Display Mode On 
-	INVOFF    = 0x20, // Display Inversion Off 
-	INVON     = 0x21, // Display Inversion On 
-	GAMSET    = 0x26, // Gamma Set 
-	DISPOFF   = 0x28, // Display Off 
-	DISPON    = 0x29, // Display On 
-	CASET     = 0x2A, // Column Address Set 
-	RASET     = 0x2B, // Row Address Set 
-	RAMWR     = 0x2C, // Memory Write 
-	RGBSET    = 0x2D, // Color Setting 4k, 65k, 262k 
-	RAMRD     = 0x2E, // Memory Read 
-	PTLAR     = 0x30, // Partial Area 
-	SCRLAR    = 0x33, // Scroll Area Set 
-	TEOFF     = 0x34, // Tearing Effect Line OFF 
-	TEON      = 0x35, // Tearing Effect Line ON 
-	MADCTL    = 0x36, // Memory Data Access Control 
-	VSCSAD    = 0x37, // Vertical Scroll Start Address of RAM 
-	IDMOFF    = 0x38, // Idle Mode Off 
-	IDMON     = 0x39, // Idle Mode On 
-	COLMOD    = 0x3A, // Interface Pixel Format 
-	RDID1     = 0xDA, // Read ID1 Value 
-	RDID2     = 0xDB, // Read ID2 Value 
-	RDID3     = 0xDC, // Read ID3 Value 
-	FRMCTR1   = 0xB1, // Frame Rate Control in normal mode, full colors 
-	FRMCTR2   = 0xB2, // Frame Rate Control in idle mode, 8 colors 
-	FRMCTR3   = 0xB3, // Frame Rate Control in partial mode, full colors 
-	INVCTR    = 0xB4, // Display Inversion Control 
-	PWCTR1    = 0xC0, // Power Control 1 
-	PWCTR2    = 0xC1, // Power Control 2 
-	PWCTR3    = 0xC2, // Power Control 3 in normal mode, full colors 
-	PWCTR4    = 0xC3, // Power Control 4 in idle mode 8colors 
-	PWCTR5    = 0xC4, // Power Control 5 in partial mode, full colors 
-	VMCTR1    = 0xC5, // VCOM Control 1 
-	VMOFCTR   = 0xC7, // VCOM Offset Control 
-	WRID2     = 0xD1, // Write ID2 Value 
-	WRID3     = 0xD2, // Write ID3 Value 
-	NVFCTR1   = 0xD9, // NVM Control Status 
-	NVFCTR2   = 0xDE, // NVM Read Command 
-	NVFCTR3   = 0xDF, // NVM Write Command 
-	GMCTRP1   = 0xE0, // Gamma +Polarity Correction Characteristics Setting 
-	GMCTRN1   = 0xE1, // Gamma -Polarity Correction Characteristics Setting 
-	GCV       = 0xFC, // Gate Pump Clock Frequency Variable 
-};
+#define NOP       0x00
+#define SWRESET   0x01 // Software Reset 
+#define RDDID     0x04 // Read Display ID 
+#define RDDST     0x09 // Read Display Status 
+#define RDDPM     0x0A // Read Display Power Mode 
+#define RDDMADCTL 0x0B // Read Display MADCTL 
+#define RDDCOLMOD 0x0C // Read Display Pixel Format 
+#define RDDIM     0x0D // Read Display Image Mode 
+#define RDDSM     0x0E // Read Display Signal Mode 
+#define RDDSDR    0x0F // Read Display Self-Diagnostic Result 
+#define SLPIN     0x10 // Sleep In 
+#define SLPOUT    0x11 // Sleep Out 
+#define PTLON     0x12 // Partial Display Mode On 
+#define NORON     0x13 // Normal Display Mode On 
+#define INVOFF    0x20 // Display Inversion Off 
+#define INVON     0x21 // Display Inversion On 
+#define GAMSET    0x26 // Gamma Set 
+#define DISPOFF   0x28 // Display Off 
+#define DISPON    0x29 // Display On 
+#define CASET     0x2A // Column Address Set 
+#define RASET     0x2B // Row Address Set 
+#define RAMWR     0x2C // Memory Write 
+#define RGBSET    0x2D // Color Setting 4k 65k 262k 
+#define RAMRD     0x2E // Memory Read 
+#define PTLAR     0x30 // Partial Area 
+#define SCRLAR    0x33 // Scroll Area Set 
+#define TEOFF     0x34 // Tearing Effect Line OFF 
+#define TEON      0x35 // Tearing Effect Line ON 
+#define MADCTL    0x36 // Memory Data Access Control 
+#define VSCSAD    0x37 // Vertical Scroll Start Address of RAM 
+#define IDMOFF    0x38 // Idle Mode Off 
+#define IDMON     0x39 // Idle Mode On 
+#define COLMOD    0x3A // Interface Pixel Format 
+#define RDID1     0xDA // Read ID1 Value 
+#define RDID2     0xDB // Read ID2 Value 
+#define RDID3     0xDC // Read ID3 Value 
+#define FRMCTR1   0xB1 // Frame Rate Control in normal mode full colors 
+#define FRMCTR2   0xB2 // Frame Rate Control in idle mode 8 colors 
+#define FRMCTR3   0xB3 // Frame Rate Control in partial mode full colors 
+#define INVCTR    0xB4 // Display Inversion Control 
+#define PWCTR1    0xC0 // Power Control 1 
+#define PWCTR2    0xC1 // Power Control 2 
+#define PWCTR3    0xC2 // Power Control 3 in normal mode full colors 
+#define PWCTR4    0xC3 // Power Control 4 in idle mode 8colors 
+#define PWCTR5    0xC4 // Power Control 5 in partial mode full colors 
+#define VMCTR1    0xC5 // VCOM Control 1 
+#define VMOFCTR   0xC7 // VCOM Offset Control 
+#define WRID2     0xD1 // Write ID2 Value 
+#define WRID3     0xD2 // Write ID3 Value 
+#define NVFCTR1   0xD9 // NVM Control Status 
+#define NVFCTR2   0xDE // NVM Read Command 
+#define NVFCTR3   0xDF // NVM Write Command 
+#define GMCTRP1   0xE0 // Gamma +Polarity Correction Characteristics Setting 
+#define GMCTRN1   0xE1 // Gamma -Polarity Correction Characteristics Setting 
+#define GCV       0xFC // Gate Pump Clock Frequency Variable 
 
+// send a byte to the display
 void display_wr_bus(uint8_t data) {
 	gpio_put(DISPLAY_CS_PIN, 0);
 
@@ -81,32 +80,39 @@ void display_wr_bus(uint8_t data) {
 	gpio_put(DISPLAY_CS_PIN, 1);
 }
 
+// send an 8 bit data to the display
 void display_wr_8(uint8_t data) {
 	gpio_put(DISPLAY_DC_PIN, 1);
 	display_wr_bus(data);
 }
 
+// send a 16 bit data to the display
 void display_wr_16(uint16_t data) {
 	gpio_put(DISPLAY_DC_PIN, 1);
 	display_wr_bus(data >> 8);
 	display_wr_bus(data);
 }
 
+// send a command to the display
 void display_wr_cmd(uint8_t cmd) {
 	gpio_put(DISPLAY_DC_PIN, 0);
 	display_wr_bus(cmd);
 }
 
+// set a window for writing a range of pixels
 void display_set_address(uint16_t x1,uint16_t y1,uint16_t x2,uint16_t y2) {
 	display_wr_cmd(CASET);
 	display_wr_16(x1 + 26);
 	display_wr_16(x2 + 26);
+
 	display_wr_cmd(RASET);
 	display_wr_16(y1 + 1);
 	display_wr_16(y2 + 1);
+
 	display_wr_cmd(RAMWR);
 }
 
+// configure spi for the display
 void spi_config() {
 	gpio_init(DISPLAY_SCK_PIN);
 	gpio_set_function(DISPLAY_SCK_PIN, GPIO_FUNC_SPI);
@@ -129,6 +135,7 @@ void spi_config() {
 	gpio_put(DISPLAY_CS_PIN, 1);
 }
 
+// initialize and configure the display
 void display_init() {
 	gpio_init(DISPLAY_DC_PIN);
 	gpio_set_dir(DISPLAY_DC_PIN, GPIO_OUT);
@@ -138,11 +145,15 @@ void display_init() {
 
 	spi_config();
 
+	// reset
 	gpio_put(DISPLAY_RST_PIN, 0);
 	sleep_ms(200);
 	gpio_put(DISPLAY_RST_PIN, 1);
 	sleep_ms(20);
 
+	// configure
+	// values taken from the supplied documentation
+	// documentation: http://myosuploads3.banggood.com/products/20190406/201904062255220.96LCD.rar
 	display_wr_cmd(SLPOUT);
 	sleep_ms(100);
 
@@ -237,6 +248,7 @@ void display_init() {
 	display_wr_cmd(DISPON);
 }
 
+// clear the display with a solid color
 void display_clear(uint16_t color) {
 	display_set_address(0, 0, DISPLAY_WIDTH - 1, DISPLAY_HEIGHT - 1);
 	for(uint8_t i = 0; i < DISPLAY_HEIGHT; i++) {
@@ -246,6 +258,8 @@ void display_clear(uint16_t color) {
 	}
 }
 
+// draw a block at (x, y)
+// the scale of x and y are the DISPLAY_BLOCK_SIZE
 void display_draw_block(uint8_t x, uint8_t y, uint16_t color) {
 	display_set_address(
 		x * DISPLAY_BLOCK_SIZE,
@@ -258,6 +272,7 @@ void display_draw_block(uint8_t x, uint8_t y, uint16_t color) {
 	}
 }
 
+// display the tetris board on the display
 void display_tetris(struct Tetris *tetris) {
 	for (uint8_t i = 0; i < BOARD_H; i++) {
 		for (uint8_t j = 0; j < BOARD_W; j++) {
@@ -268,8 +283,10 @@ void display_tetris(struct Tetris *tetris) {
 	}
 }
 
+// draw a character on the screen at (x, y)
+// the scale of x and y are 8, because it's using 8x8 fonts
 void display_draw_char(uint8_t x, uint8_t y, char c) {
-	if (c < 0) {
+	if (c > 127) {
 		return;
 	}
 	display_set_address(
@@ -280,7 +297,7 @@ void display_draw_char(uint8_t x, uint8_t y, char c) {
 	);
 	for (uint8_t cx = 0; cx < 8; cx++) {
 		for (uint8_t cy = 0; cy < 8; cy++) {
-			uint8_t bit = font8x8_basic[c][cx] & 1 << cy;
+			uint8_t bit = font8x8_basic[(uint8_t)c][cx] & 1 << cy;
 			display_wr_16(bit ? RED_COLOR : BLACK_COLOR);
 		}
 	}

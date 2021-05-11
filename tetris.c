@@ -2,6 +2,7 @@
 
 #include "tetris.h"
 
+// initialize the game
 void tetris_init(struct Tetris *tetris) {
 	// empty board
 	for (uint8_t i = 0; i < (BOARD_W * BOARD_H) / 8; i++) {
@@ -194,45 +195,75 @@ uint8_t tetris_check_overlap(struct Tetris *tetris) {
 	return 0;
 }
 
+// rotate the current tetromino counter clockwise
 void tetris_rotate_ccw(struct Tetris *tetris) {
+	// don't do anything if the game needs to be updated
 	if (tetris->need_update) {
 		return;
 	}
+
+	// rotate
 	tetris_rotate_tetromino_ccw(tetris, tetris->tetromino);
+
+	// undo if the new position is ivalid
 	if (tetris_check_overlap(tetris)) {
 		tetris_rotate_tetromino_cw(tetris, tetris->tetromino);
 	}
+
+	// fix the position if the tetromino hangs out of the board
 	tetris_fix_overhang(tetris);
+
+	// if there is a collision, save to board, and set flag for update
 	if (tetris_check_collision(tetris)) {
 		tetris_save_tetromino_to_board(tetris);
 		tetris->need_update = 1;
 	}
 }
 
+// rotate the current tetromino clockwise
 void tetris_rotate_cw(struct Tetris *tetris) {
+	// don't do anything if the game needs to be updated
 	if (tetris->need_update) {
 		return;
 	}
+
+	// rotate
 	tetris_rotate_tetromino_cw(tetris, tetris->tetromino);
+
+	// undo if the new position is ivalid
 	if (tetris_check_overlap(tetris)) {
 		tetris_rotate_tetromino_ccw(tetris, tetris->tetromino);
 	}
+
+	// fix the position if the tetromino hangs out of the board
 	tetris_fix_overhang(tetris);
+
+	// if there is a collision, save to board, and set flag for update
 	if (tetris_check_collision(tetris)) {
 		tetris_save_tetromino_to_board(tetris);
 		tetris->need_update = 1;
 	}
 }
 
+// move the current tetromino to the right
 void tetris_move_tetromino_right(struct Tetris *tetris) {
+	// don't do anything if the game needs to be updated
 	if (tetris->need_update) {
 		return;
 	}
+
+	// move
 	tetris->x++;
+
+	// undo if the new position is invalid
 	if (tetris_check_overlap(tetris)) {
 		tetris->x--;
 	}
+
+	// fix the position if the tetromino hangs out of the board
 	tetris_fix_overhang(tetris);
+
+	// if there is a collision, save to board, and set flag for update
 	if (tetris_check_collision(tetris)) {
 		tetris_save_tetromino_to_board(tetris);
 		tetris->need_update = 1;
@@ -240,20 +271,30 @@ void tetris_move_tetromino_right(struct Tetris *tetris) {
 }
 
 void tetris_move_tetromino_left(struct Tetris *tetris) {
+	// don't do anything if the game needs to be updated
 	if (tetris->need_update) {
 		return;
 	}
+
+	// move
 	tetris->x--;
+
+	// undo if the new position is invalid
 	if (tetris_check_overlap(tetris)) {
 		tetris->x++;
 	}
+
+	// fix the position if the tetromino hangs out of the board
 	tetris_fix_overhang(tetris);
+
+	// if there is a collision, save to board, and set flag for update
 	if (tetris_check_collision(tetris)) {
 		tetris_save_tetromino_to_board(tetris);
 		tetris->need_update = 1;
 	}
 }
 
+// set a new random tetromino
 void tetris_set_new_tetromino(struct Tetris *tetris) {
 	// set a new random tetromino
 	tetris->tetromino = tetris_random() % N_TETROMINOS;
@@ -276,6 +317,7 @@ void tetris_set_new_tetromino(struct Tetris *tetris) {
 	}
 }
 
+// check if the current tetromino collides with a block under it
 uint8_t tetris_check_collision(struct Tetris *tetris) {
 	// get the size from the first bit
 	uint8_t size = 3 + (tetris->tetrominos[tetris->tetromino] >> 15);
@@ -305,6 +347,7 @@ uint8_t tetris_check_collision(struct Tetris *tetris) {
 	return 0;
 }
 
+// save the current tetromino on the board
 void tetris_save_tetromino_to_board(struct Tetris *tetris) {
 	// get the size from the first bit
 	uint8_t size = 3 + (tetris->tetrominos[tetris->tetromino] >> 15);
@@ -319,6 +362,7 @@ void tetris_save_tetromino_to_board(struct Tetris *tetris) {
 	}
 }
 
+// remove the <r>-th row from the board, shift all others down
 void tetris_remove_row(struct Tetris *tetris, uint8_t r) {
 	// shift all rows down
 	for (uint8_t i = r; i > 0; i--) {
@@ -387,7 +431,9 @@ uint8_t tetris_update(struct Tetris *tetris) {
 	return 0;
 }
 
+// drop the current tetromino to the bottom
 void tetris_drop(struct Tetris *tetris) {
+	// don't do anything if the game needs to be updated
     if (tetris->need_update) {
         return;
     } else {

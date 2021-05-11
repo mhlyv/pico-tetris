@@ -8,25 +8,11 @@
 
 // where the toplist starts
 #define FLASH_TARGET_OFFSET (256 * 1024)
+
+// pointer to the content of the flash
 const uint8_t *flash_content = (const uint8_t *)(XIP_BASE + FLASH_TARGET_OFFSET);
 
-static void toplist_write(uint8_t nth, uint16_t val) {
-	uint8_t buffer[FLASH_PAGE_SIZE] = {0};
-
-	// read old data
-	for (uint8_t i = 0; i < 6; i++) {
-		buffer[i] = flash_content[i];
-	}
-
-	buffer[nth * 2] = val >> 8;
-	buffer[nth * 2 + 1] = val;
-
-	uint32_t ints = save_and_disable_interrupts();
-	flash_range_erase(FLASH_TARGET_OFFSET, FLASH_SECTOR_SIZE);
-    flash_range_program(FLASH_TARGET_OFFSET, buffer, FLASH_PAGE_SIZE);
-	restore_interrupts(ints);
-}
-
+// write the new scores to the flash
 static void toplist_write_scores(uint16_t *scores) {
 	uint8_t buffer[FLASH_PAGE_SIZE] = {0};
 	for (uint8_t i = 0; i < 3; i++) {
@@ -34,20 +20,25 @@ static void toplist_write_scores(uint16_t *scores) {
 		buffer[2 * i + 1] = scores[i];
 	}
 
+	// interrupts need to be disabled during writing the flash
 	uint32_t ints = save_and_disable_interrupts();
 	flash_range_erase(FLASH_TARGET_OFFSET, FLASH_SECTOR_SIZE);
     flash_range_program(FLASH_TARGET_OFFSET, buffer, FLASH_PAGE_SIZE);
 	restore_interrupts(ints);
 }
 
+// set the toplist scores to 0
 void toplist_clear() {
 	uint8_t buffer[FLASH_PAGE_SIZE] = {0};
 	uint32_t ints = save_and_disable_interrupts();
+
+	// interrupts need to be disabled during writing the flash
 	flash_range_erase(FLASH_TARGET_OFFSET, FLASH_SECTOR_SIZE);
     flash_range_program(FLASH_TARGET_OFFSET, buffer, FLASH_PAGE_SIZE);
 	restore_interrupts(ints);
 }
 
+// add a new score to the toplist if it qualifies
 void toplist_add(uint16_t score) {
 	uint16_t scores[3];
 	uint8_t higher_then = TOPLIST_LENGTH;
@@ -74,6 +65,7 @@ void toplist_add(uint16_t score) {
 	}
 }
 
+// return the nth score in the toplist
 uint16_t toplist_read(uint8_t nth) {
 	if (nth >= TOPLIST_LENGTH) {
 		return -1;

@@ -17,10 +17,8 @@
 #define UART_TX_PIN 0
 #define UART_RX_PIN 1
 
-bool tetris_uart_is_ready();
 void tetris_uart_init();
 void tetris_uart_print(struct Tetris *tetris);
 void tetris_uart_handle_rx();
-void tetris_uart_write_to_buffer();
 
 #endif // TETRIS_UART_H

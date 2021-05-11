@@ -5,17 +5,27 @@
 
 #include "command_buffer.h"
 
-volatile static uint8_t command_buffer[COMMAND_BUFFER_SIZE] = {0};
-volatile static uint8_t *command_write = command_buffer;
-volatile static uint8_t *command_read = command_buffer;
-volatile static bool lock = false;
+// buffer for storing commands
+static volatile uint8_t command_buffer[COMMAND_BUFFER_SIZE] = {0};
 
+// pointer for the next write
+static volatile uint8_t *command_write = command_buffer;
+
+// pointer for the next read
+static volatile uint8_t *command_read = command_buffer;
+
+// flag for locking the buffer (in case of using the buffer in interrupts)
+static volatile bool lock = false;
+
+// write a command to the buffer
+// return true if the write was successful, false otherwise
 bool command_buffer_write(uint8_t command) {
 	bool success = false;
 	if (!lock) {
 		lock = true;
 		success = true;
 
+		// check if the command is valid
 		bool valid = command == LEFT_CMD || command == RIGHT_CMD ||
 			command == ROTATE_CW_CMD || command == ROTATE_CCW_CMD ||
 			command == RESET_CMD || command == DROP_CMD;
@@ -23,6 +33,8 @@ bool command_buffer_write(uint8_t command) {
 		if (valid) {
 			*command_write = command;
 			command_write++;
+
+			// jump to the beginning if the end was reached
 			if (command_write == command_buffer + COMMAND_BUFFER_SIZE) {
 				command_write = command_buffer;
 			}
@@ -33,6 +45,8 @@ bool command_buffer_write(uint8_t command) {
 	return success;
 }
 
+// read a command to the buffer
+// return true if the read was successful, false otherwise
 uint8_t command_buffer_read() {
 	uint8_t command = 0;
 	if (!lock) {
@@ -44,6 +58,8 @@ uint8_t command_buffer_read() {
 		if (command != 0) {
 			*command_read = 0;
 			command_read++;
+
+			// jump to the beginning if the end was reached
 			if (command_read == command_buffer + COMMAND_BUFFER_SIZE) {
 				command_read = command_buffer;
 			}
