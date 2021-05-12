@@ -31,35 +31,148 @@
 
 ## A játék menete:
 
-Az eszközt (rpi pico) ha megfelelő helyre bedugjuk az usb-csatlakozójával, akkor egyből elindul a játék. Ez egyrész látható a kijelzőn, másrészt ha pc-hez csatlakoztatjuk az usb/uart FT232RL modult, akkor a gépen serial kommunikációs szoftverrel 115200-s baudrate-el látható a szöveges megjelenítés is. A játék a közismert tetris játékot próbálja imitálni, fentről véletlen választott és véletlen orientációjú elemek (hivatalos nevükön tetromino-k) hullanak és a játékos célja ezeket úgy elhelyezni hogy a blokkok egész sorokat töltsenek ki, mivel a teljes sorok törlődnek, és minden más ami felettük van lejjebb esik eggyel. A játék célja minnél több ilyen telített sort elérni, mivel a játék pontszáma abból adódik, hogy hány ilyen telített sort sikerült létrehozni, törölni. A játék akkor ér véget, mikor az aktuális elem ahogy leérkezik van olyan blokkja amely kilóg a pályáról. Ekkor a kijelzőn, és a szöveges kimeneten is láthatóvá válik egy Game Over felirat, az aktuális játékban elért pontszám, és egy ranglista a legjobb 3 eredményről. Ez után az eszköz vár egy gombnyomásra, majd újraindul a játék.
+Az eszközt (rpi pico) ha megfelelő helyre bedugjuk az usb-csatlakozójával, akkor
+egyből elindul a játék. Ez egyrész látható a kijelzőn, másrészt ha pc-hez
+csatlakoztatjuk az usb/uart FT232RL modult, akkor a gépen serial kommunikációs
+szoftverrel 115200-s baudrate-el látható a szöveges megjelenítés is. A játék a
+közismert tetris játékot próbálja imitálni, fentről véletlen választott és
+véletlen orientációjú elemek (hivatalos nevükön tetromino-k) hullanak és a
+játékos célja ezeket úgy elhelyezni hogy a blokkok egész sorokat töltsenek ki,
+mivel a teljes sorok törlődnek, és minden más ami felettük van lejjebb esik
+eggyel. A játék célja minnél több ilyen telített sort elérni, mivel a játék
+pontszáma abból adódik, hogy hány ilyen telített sort sikerült létrehozni,
+törölni. A játék akkor ér véget, mikor az aktuális elem ahogy leérkezik van
+olyan blokkja amely kilóg a pályáról. Ekkor a kijelzőn, és a szöveges
+kimeneten is láthatóvá válik egy Game Over felirat, az aktuális játékban elért
+pontszám, és egy ranglista a legjobb 3 eredményről. Ez után az eszköz vár egy
+gombnyomásra, majd újraindul a játék.
 
+
+## Funkcionális blokkvázlat:
+
+![](./func-block.png)
+
+Funkcionalitás alapjás 7 logikailag összetartozó egységre bontottam a feladatot.
+
+- **Gyorsulásérzékelő modul:** A modul magas szintű használata úgy néz ki,
+hogy mikor a modul jelzi hogy szabad belőle értéket olvasni, akkor ki lehet
+belőle olvasni egy parancsot. Ez úgy működne, hogy akkor jönne létre értelmes
+parancs, ha a gyorsulásmérő nyugalmi állapotában történt méréseitől egy adott
+határon túl eltérnénk pozitív vagy negatív irányban. A nyugalmi állapot
+kijelölése kalibrációval történne, ami úgy működne hogy megállapítanánk
+egy offsetet, amelyet a mért értékhez adva 0-t kéne kapnunk. A modulba tartozik
+az időzítő amely periodikusan ellenőrzi majd beállítja a mintavételezést
+engedélyező jelet, mert ez felhasználja azt hogy ha egy mérés valóban átlépi
+az adott tűréshatárt, akkor csak több idő múlva legyen újra engedélyezve a
+modul mintavételezése, így elkerülve a hibás méréseket, és ez nagyon elegánsan
+megvalósítható úgy, hogy a többi alkotóelemtől teljesen függetlenül működjön.
+
+- **Kijelző modul:** A modulnak magas szinten egy feladata van, hogy
+megjelenítse a játék aktuális állapotát. Ez több részből állhat, szükség lehet
+szöveg, vagy négyzetek rajzolására. A szövegmegjelenítés-t szét lehet bontani
+karakterek megjelenítésére, amihez viszont szükség lesz az adott karakterek
+bitmap reprezentációjára. A négyzetek és karakterek rajzolását pedig tehetjük
+pixelenként amit a kijelző kezelő le tud bonyolítani parancsok és adatok az
+LCD-nek való küldésével.
+
+- **UART modul:** A modulnak magas szinten két feladata van, parancsok
+olvasása, és a játék aktuális állapotának megjelenítése szöveges formátumban.
+A parancsok olvasása nem bonyolult, csupán szabályokat kell állítani, hogy egy
+karakter/karaktersor milyen parancsnak feleljen meg. A játék megjelenítése
+pedig egyszerűbb mint a kijelző modulban, így ezt sem kell több részre bontani.
+
+- **Gombkezelő modul:** A modul használata megegyezik a gyorsulásérzékelő
+modullal, jelzi ha szabad belőle parancsot olvasni. Ekkor a 4 nyomógomb
+állapotát kiolvashatjuk egy gombkódként, majd bevezethetünk szabályokat hogy
+melyik gombkód milyen parancsnak felel meg. A gombkezelő megjegyzi a gombok
+legutóbbi állapotát, és ebből ki tudja szűrni a meg nem változott gombokat,
+és a gombkódban csak az újonnan lenyomott gombok jelennek meg, így elkerüli
+a hibás működést. A modul mintavételezésnék engédélyezésénék periodikus
+változtatását is ide csoportosíthatjuk, így ez is elegánsan függetleníthető
+minden mástól.
+
+- **Parancs buffer modul:** A modulnak két feladata van, beérkező parancsok
+tárolása, és parancsok olvasása.
+
+- **Ranglista modul:** A modul feladata hogy megtartsa az adott darab
+legsikeresebb játék eredményét. A modulnak két feladata van, hogy ki lehessen
+olvasni a ranglista eredményeit és hogy új eredmény lehessen hozzáadni.
+
+- **Tetris modul:** A modul feladata hogy a tetris játék viselkedését
+szolgáltassa, azaz le lehessen kérdezni a játék aktuális állapotát, és előre
+definiált eseményeket tudjon végrehajtani a játék értelmében, viszont úgy
+hogy a játéknak lehetnek olyan állapotai amelyekben nem hajthatók végre
+bizonyos események.
+
+- **Végrehajtó modul:** A modul feladata, hogy a parancs bufferből olvasott
+parancsokat hajtsa végre, és hogy frissítse a játék állapotát megjelenítő
+perifériákat ha ez szükséges. Emellett ez a modul kezeli a ready jelekkel
+rendelkező modulok feladatainak végrehajtását.
+
+## Hardver-szoftver szétválasztás:
+
+![](./hw-sw.png)
+
+A feladatnál a harware/software szétválasztás nagyon egyértelmű, az LCD
+kijelző, a gyorsulásérzékelő szenzor, a 4 db. nyomógomb, az UART, UART/USB és
+a nem felejtő flash memórián kívül mindent meg lehet valósítani szoftverrel.
+
+Összeszámolhatók a portbitek:
+
+- 4 db. a 4 nyomógombhoz.
+- 2 db. a gyorsulásérzékelővel történő I2C kommunikációhoz.
+- 2 db. az UART/USB átalakítóhoz.
+- 5 db. az LCD kijelzővel való egyirányú, bővített SPI kommunikációhoz (SCK,
+MOSI, RST, Data/Command, CS).
+
+Tehát összesen 11 darab portbitre lesz szükség.
+
+## Hardver blokkvázlat:
+
+![](./hw-block.png)
+
+A fejlesztői kártya egy Raspberry Pi Pico, a tápellátást a beépített USB
+csatlakozón keresztül kapja, és az UART/USB átalakítón kívül a többi
+perfiériának ez szolgál tápellátást. Az UART/USB átalakító szintén saját USB
+csatlakozón keresztül kap tápellátást.
 
 ## A játék irányítása:
 
 A játékot többféleképpen lehet irányítani:
 
-- Az eszközön találató gombokkal. A gombok egy sarkára állított négyszögben vannak elhelyezve, így irányokat alapján fogok rájuk hivatkozni. Itt fontos még megjegyezni, hogy a hosszan letartott gombnyomás egyenértékű a rövid gombnyomással, azaz a gomb lenyomva tartása nem válja ki az adott esemény 1-nél többször.
+- Az eszközön találató gombokkal. A gombok egy sarkára állított négyszögben
+vannak elhelyezve, így irányokat alapján fogok rájuk hivatkozni. Itt fontos
+még megjegyezni, hogy a hosszan letartott gombnyomás egyenértékű a rövid
+gombnyomással, azaz a gomb lenyomva tartása nem válja ki az adott esemény
+1-nél többször.
 	- Balra gomb: az éppen hulló játékelem 1 blokknyival balra mozdul.
 	- Jobbra gomb: az éppen hulló játékelem 1 blokknyival jobbra mozdul.
-	- Fel gomb: az éppen hulló játékelem óramutató járásával megegyező irányban elfordul 90 fokkal.
-	- Le gomb: az éppen hulló játékelem óramutató járásával ellenkező irányban elfordul 90 fokkal.
+	- Fel gomb: az éppen hulló játékelem óramutató járásával megegyező irányban
+	elfordul 90 fokkal.
+	- Le gomb: az éppen hulló játékelem óramutató járásával ellenkező irányban
+	elfordul 90 fokkal.
 	- Fel és Le gomb egyszerre: az éppen hulló játékelem leesik.
 
 - Serial kommunikációs szoftverből, egy karakternyi parancsok használatával.
 	- ’h’: az éppen hulló játékelem 1 blokknyival balra mozdul.
 	- ’l’: az éppen hulló játékelem 1 blokknyival jobbra mozdul.
-	- ’k’: az éppen hulló játékelem óramutató járásával megegyező irányban elfordul 90 fokkal.
-	- ’j’: az éppen hulló játékelem óramutató járásával ellenkező irányban elfordul 90 fokkal.
+	- ’k’: az éppen hulló játékelem óramutató járásával megegyező irányban
+	elfordul 90 fokkal.
+	- ’j’: az éppen hulló játékelem óramutató járásával ellenkező irányban
+	elfordul 90 fokkal.
 	- ’d’: az éppen hulló játékelem leesik.
 	- ’r’: a gyroszkóp újrakalibrálódik, és a játék újraindul.
 
-- Az eszközön találató gyorsulásmérővel, az eszköz jobbra, balra mozdításával. A szenzor elég érzékeny, így előfordulhat hogy egy óvatlanabb gombnyomás is átlépheti az események regisztrálásához fűzött tűréshatárt.
+- Az eszközön találató gyorsulásmérővel, az eszköz jobbra, balra mozdításával.
+A szenzor elég érzékeny, így előfordulhat hogy egy óvatlanabb gombnyomás is
+átlépheti az események regisztrálásához fűzött tűréshatárt.
 	- Az eszköz balra mozdítása: az éppen hulló játékelem 1 blokknyival balra mozdul.
 	- Az eszköz jobbra mozdítása: az éppen hulló játékelem 1 blokknyival jobbra mozdul.
 
 ## Az elkészített forráskód:
 
-Megtalálható online is: https://github.com/mhlyv/pico-tetris. A forráskódot próbáltam logikailag összefüggő elemekre bontani.
+Megtalálható online is: https://github.com/mhlyv/pico-tetris. A forráskódot
+próbáltam logikailag összefüggő elemekre bontani.
 
 ### Tetris
 
@@ -216,7 +329,13 @@ Ez a modul adja az irányítóparancsok bufferelését.
 #define DROP_CMD 'd'
 ```
 
-A parancsok egy `COMMAND_BUFFER_SIZE` méretű globális, de statikus tömbben vannak tárolva (`command_buffer`). Ehhez tartozik egy írási (`command_write`) és olvasási (`command_read`) pointer, amelyek a következő írandó/olvasandó elemre mutatnak, így lehet elérni körkörös buffer szerű működést. Ezen kívül van 2 globális de statikus flag (`write_lock/read_lock`) amelyek azt jelzik hogy a buffer épp olvasva vagy írva van-e. Ezek arra szolgálnak hogy ne lehessen egyszerre adatot írni és olvasni pl. ha interruptban tennénk ezt.
+A parancsok egy `COMMAND_BUFFER_SIZE` méretű globális, de statikus tömbben
+vannak tárolva (`command_buffer`). Ehhez tartozik egy írási (`command_write`)
+és olvasási (`command_read`) pointer, amelyek a következő írandó/olvasandó
+elemre mutatnak, így lehet elérni körkörös buffer szerű működést. Ezen kívül
+van 2 globális de statikus flag (`write_lock/read_lock`) amelyek azt jelzik
+hogy a buffer épp olvasva vagy írva van-e. Ezek arra szolgálnak hogy ne
+lehessen egyszerre adatot írni és olvasni pl. ha interruptban tennénk ezt.
 
 **Funkciók:**
 ```C
