@@ -31,9 +31,13 @@ bool command_buffer_write(uint8_t command) {
 		success = true;
 
 		// check if the command is valid
-		bool valid = command == LEFT_CMD || command == RIGHT_CMD ||
-			command == ROTATE_CW_CMD || command == ROTATE_CCW_CMD ||
-			command == RESET_CMD || command == DROP_CMD;
+		bool valid = command == LEFT_CMD ||
+			command == RIGHT_CMD ||
+			command == ROTATE_CW_CMD ||
+			command == ROTATE_CCW_CMD ||
+			command == RESET_CMD ||
+			command == DROP_CMD ||
+			command == GYRO_TOGGLE_CMD;
 
 		if (valid) {
 			*command_write = command;

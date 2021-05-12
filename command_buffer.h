@@ -11,6 +11,7 @@
 #define ROTATE_CCW_CMD 'j'
 #define RESET_CMD 'r'
 #define DROP_CMD 'd'
+#define GYRO_TOGGLE_CMD 'g'
 
 bool command_buffer_write(uint8_t command);
 uint8_t command_buffer_read();
