@@ -9,10 +9,11 @@
 #define GYRO_ADDR 0x68
 #define GYRO_BAUD_RATE 400000
 #define GYRO_SAMPLE_RATE 20
-#define GYRO_TIMEOUT 140
-#define GYRO_TRESHOLD 2000
+#define GYRO_TIMEOUT 200
+#define GYRO_TRESHOLD 2500
 
 void gyro_init();
+void gyro_toggle();
 void gyro_reset();
 bool gyro_is_ready();
 void gyro_read_acc(int16_t accel[3]);

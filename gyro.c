@@ -29,6 +29,20 @@ void gyro_init() {
 	gyro_reset();
 }
 
+// turn on the gyro timer if it isn't running, turn it off otherwise.
+void gyro_toggle() {
+	if (!cancel_repeating_timer(&gyro_timer)) {
+		if (!add_repeating_timer_ms(GYRO_SAMPLE_RATE, gyro_ready_callback,
+					NULL, &gyro_timer)) {
+			uart_puts(UART_ID, "Couldn't start gyro repeating timer\r\n");
+		}
+		uart_puts(UART_ID, "GYRO turned on!\r\n");
+	} else {
+		uart_puts(UART_ID, "GYRO turned off!\r\n");
+		GYRO_READY = false;
+	}
+}
+
 // reset the gyroscope
 void gyro_reset() {
 	cancel_repeating_timer(&gyro_timer);
